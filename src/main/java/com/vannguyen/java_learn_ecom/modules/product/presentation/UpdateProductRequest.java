@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
-public record CreateProductRequest(
+public record UpdateProductRequest(
 
         @NotNull(message = "Product category id must not be null")
         Long categoryId,

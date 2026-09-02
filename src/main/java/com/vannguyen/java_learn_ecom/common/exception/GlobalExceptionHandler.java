@@ -43,4 +43,16 @@ public class GlobalExceptionHandler {
                 .badRequest()
                 .body(ApiResponse.error(400, exception.getMessage()));
     }
+
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(
+            ResourceNotFoundException exception
+    ) {
+        log.warn("Resource not found: message={}", exception.getMessage());
+
+        return ResponseEntity
+                .status(404)
+                .body(ApiResponse.error(404, exception.getMessage()));
+    }
 }
