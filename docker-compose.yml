@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: java-learn-ecom-postgres
+    environment:
+      POSTGRES_DB: java_learn_ecom
+      POSTGRES_USER: user_java_learn_ecom
+      POSTGRES_PASSWORD: v@nnguyen123
+    ports:
+      - "55432:5432"
+    volumes:
+      - java_learn_ecom_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  java_learn_ecom_postgres_data:
