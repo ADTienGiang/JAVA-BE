@@ -10,7 +10,9 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
-
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 @Entity
 @Table(name = "categories")
 public class CategoryJpaEntity {
@@ -33,6 +35,9 @@ public class CategoryJpaEntity {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "category")
+    private List<ProductJpaEntity> products = new ArrayList<>();
 
     protected CategoryJpaEntity() {
     }
@@ -84,5 +89,9 @@ public class CategoryJpaEntity {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public List<ProductJpaEntity> getProducts() {
+        return products;
     }
 }

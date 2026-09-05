@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import com.vannguyen.java_learn_ecom.common.dto.PageResult;
-
+import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProductService {
 
@@ -29,6 +29,7 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Transactional
     public Product create(CreateProductCommand command) {
         log.info("Create product request received: categoryId={}, name={}",
                 command.categoryId(), command.name());
@@ -63,6 +64,7 @@ public class ProductService {
         return savedProduct;
     }
 
+    @Transactional(readOnly = true)
     public Product findById(Long id) {
         log.info("Find product by id: id={}", id);
 
@@ -72,13 +74,13 @@ public class ProductService {
                     return new ResourceNotFoundException("Product not found");
                 });
     }
-
+    @Transactional(readOnly = true)
     public List<Product> findAllActive() {
         log.info("Find all active products");
 
         return productRepository.findAllActive();
     }
-
+    @Transactional
     public Product update(UpdateProductCommand command) {
         log.info("Update product request received: id={}, categoryId={}, name={}",
                 command.id(), command.categoryId(), command.name());
@@ -112,7 +114,7 @@ public class ProductService {
 
         return savedProduct;
     }
-
+    @Transactional
     public Product deactivate(Long id) {
         log.info("Deactivate product request received: id={}", id);
 
@@ -126,7 +128,7 @@ public class ProductService {
 
         return savedProduct;
     }
-
+    @Transactional(readOnly = true)
     public PageResult<Product> search(ProductSearchQuery query) {
         log.info("Search products: keyword={}, categoryId={}, minPrice={}, maxPrice={}",
                 query.keyword(), query.categoryId(), query.minPrice(), query.maxPrice());

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.vannguyen.java_learn_ecom.common.exception.ResourceNotFoundException;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CategoryService {
 
@@ -19,6 +20,7 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Transactional
     public Category create(CreateCategoryCommand command) {
         log.info("Create category request received: name={}, slug={}", command.name(), command.slug());
 
@@ -40,6 +42,7 @@ public class CategoryService {
         return savedCategory;
     }
 
+    @Transactional(readOnly = true)
     public Category findById(Long id) {
         log.info("Find category by id: id={}", id);
 
@@ -50,12 +53,13 @@ public class CategoryService {
                 });
     }
 
+    @Transactional(readOnly = true)
     public List<Category> findAllActive() {
         log.info("Find all active categories");
 
         return categoryRepository.findAllActive();
     }
-
+    @Transactional
     public Category update(UpdateCategoryCommand command) {
         log.info("Update category request received: id={}, name={}, slug={}",
                 command.id(), command.name(), command.slug());
@@ -77,7 +81,7 @@ public class CategoryService {
 
         return savedCategory;
     }
-
+    @Transactional
     public Category deactivate(Long id) {
         log.info("Deactivate category request received: id={}", id);
 

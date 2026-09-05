@@ -14,7 +14,12 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 @Entity
 @Table(name = "products")
 public class ProductJpaEntity {
@@ -22,6 +27,13 @@ public class ProductJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    private CategoryJpaEntity category;
+
+    @OneToMany(mappedBy = "product")
+    private List<ProductVariantJpaEntity> variants = new ArrayList<>();
 
     @Column(name = "category_id", nullable = false)
     private Long categoryId;
@@ -99,5 +111,12 @@ public class ProductJpaEntity {
 
     public ProductStatus getStatus() {
         return status;
+    }
+
+    public CategoryJpaEntity getCategory() {
+        return category;
+    }
+    public List<ProductVariantJpaEntity> getVariants() {
+        return variants;
     }
 }

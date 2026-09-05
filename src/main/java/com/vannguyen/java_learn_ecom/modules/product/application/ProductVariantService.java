@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProductVariantService {
 
@@ -26,7 +27,7 @@ public class ProductVariantService {
         this.productVariantRepository = productVariantRepository;
         this.productRepository = productRepository;
     }
-
+    @Transactional
     public ProductVariant create(CreateProductVariantCommand command) {
         log.info("Create product variant request received: productId={}, sku={}",
                 command.productId(), command.sku());
@@ -64,7 +65,7 @@ public class ProductVariantService {
         return savedVariant;
     }
 
-
+    @Transactional(readOnly = true)
     public List<ProductVariant> findAllActiveByProductId(Long productId) {
         log.info("Find all active product variants: productId={}", productId);
 
@@ -75,7 +76,7 @@ public class ProductVariantService {
 
         return productVariantRepository.findAllActiveByProductId(productId);
     }
-
+    @Transactional
     public ProductVariant update(UpdateProductVariantCommand command) {
         log.info("Update product variant request received: productId={}, variantId={}, sku={}",
                 command.productId(), command.variantId(), command.sku());
@@ -121,6 +122,7 @@ public class ProductVariantService {
         return savedVariant;
     }
 
+    @Transactional
     public ProductVariant deactivate(Long productId, Long variantId) {
         log.info("Deactivate product variant request received: productId={}, variantId={}",
                 productId, variantId);

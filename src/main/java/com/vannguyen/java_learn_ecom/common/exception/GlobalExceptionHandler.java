@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
+import org.springframework.dao.DataIntegrityViolationException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -54,5 +54,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(404)
                 .body(ApiResponse.error(404, exception.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(
+            DataIntegrityViolationException exception
+    ) {
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("databaseMessage", exception.getMostSpecificCause().getMessage());
+
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.error(
+                        400,
+                        "Data violates database constraint",
+                        details
+                ));
     }
 }

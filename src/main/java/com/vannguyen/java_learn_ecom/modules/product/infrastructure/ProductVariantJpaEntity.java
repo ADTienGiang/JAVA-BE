@@ -11,7 +11,9 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 @Entity
 @Table(name = "product_variants")
 public class ProductVariantJpaEntity {
@@ -22,6 +24,10 @@ public class ProductVariantJpaEntity {
 
     @Column(name = "product_id", nullable = false)
     private Long productId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    private ProductJpaEntity product;
 
     @Column(nullable = false, unique = true, length = 80)
     private String sku;
@@ -95,5 +101,8 @@ public class ProductVariantJpaEntity {
 
     public boolean isActive() {
         return active;
+    }
+    public ProductJpaEntity getProduct() {
+        return product;
     }
 }
