@@ -2,13 +2,11 @@ package com.vannguyen.java_learn_ecom.modules.product.infrastructure;
 
 import com.vannguyen.java_learn_ecom.modules.product.domain.Category;
 import com.vannguyen.java_learn_ecom.modules.product.domain.CategoryRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.List;
-@Repository
 public class InMemoryCategoryRepository implements CategoryRepository {
 
     private final Map<Long, Category> categories = new HashMap<>();

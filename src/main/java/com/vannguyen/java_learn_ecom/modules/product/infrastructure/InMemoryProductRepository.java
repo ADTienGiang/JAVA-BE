@@ -3,7 +3,6 @@ package com.vannguyen.java_learn_ecom.modules.product.infrastructure;
 import com.vannguyen.java_learn_ecom.modules.product.domain.Product;
 import com.vannguyen.java_learn_ecom.modules.product.domain.ProductRepository;
 import com.vannguyen.java_learn_ecom.modules.product.domain.ProductStatus;
-import org.springframework.stereotype.Repository;
 import com.vannguyen.java_learn_ecom.modules.product.application.ProductSearchQuery;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.Optional;
 import com.vannguyen.java_learn_ecom.common.dto.PageResult;
 
 import java.util.Comparator;
-@Repository
 public class InMemoryProductRepository implements ProductRepository {
 
     private final Map<Long, Product> products = new HashMap<>();

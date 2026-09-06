@@ -2,14 +2,12 @@ package com.vannguyen.java_learn_ecom.modules.product.infrastructure;
 
 import com.vannguyen.java_learn_ecom.modules.product.domain.ProductVariant;
 import com.vannguyen.java_learn_ecom.modules.product.domain.ProductVariantRepository;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-@Primary
 public class JpaProductVariantRepository implements ProductVariantRepository {
 
     private final SpringDataProductVariantJpaRepository springDataProductVariantJpaRepository;

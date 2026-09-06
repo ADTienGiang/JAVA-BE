@@ -2,14 +2,12 @@ package com.vannguyen.java_learn_ecom.modules.product.infrastructure;
 
 import com.vannguyen.java_learn_ecom.modules.product.domain.Category;
 import com.vannguyen.java_learn_ecom.modules.product.domain.CategoryRepository;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-@Primary
 public class JpaCategoryRepository implements CategoryRepository {
 
     private final SpringDataCategoryJpaRepository springDataCategoryJpaRepository;

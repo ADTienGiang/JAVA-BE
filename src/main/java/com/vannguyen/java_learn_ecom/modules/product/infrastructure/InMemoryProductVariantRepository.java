@@ -2,14 +2,12 @@ package com.vannguyen.java_learn_ecom.modules.product.infrastructure;
 
 import com.vannguyen.java_learn_ecom.modules.product.domain.ProductVariant;
 import com.vannguyen.java_learn_ecom.modules.product.domain.ProductVariantRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Repository
 public class InMemoryProductVariantRepository implements ProductVariantRepository {
 
     private final Map<Long, ProductVariant> variants = new HashMap<>();
