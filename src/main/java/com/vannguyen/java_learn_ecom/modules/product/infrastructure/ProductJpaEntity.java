@@ -119,4 +119,8 @@ public class ProductJpaEntity {
     public List<ProductVariantJpaEntity> getVariants() {
         return variants;
     }
+
+    public void changeNameForLearning(String name) {
+        this.name = name;
+    }
 }
