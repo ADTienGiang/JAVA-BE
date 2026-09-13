@@ -21,6 +21,20 @@ import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.Jpa
 import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.ClearPersistenceContextProbeResult;
 import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.RefreshProbeResult;
 import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.SaveAndFlushProbeResult;
+import com.vannguyen.java_learn_ecom.modules.product.domain.ProductStatus;
+import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.JpqlBasicProbeResult;
+import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.JpqlMultiConditionProbeResult;
+import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.JpqlDynamicConditionProbeResult;
+import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.NativeQueryProbeResult;
+import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.NativeProjectionProbeResult;
+import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.ModifyingQueryProbeResult;
+import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.ModifyingClearAutomaticallyProbeResult;
+import com.vannguyen.java_learn_ecom.modules.product.infrastructure.learning.JpaPersistenceContextProbeService.ModifyingFlushAndClearProbeResult;
+
+
+
+
+
 @RestController
 @RequestMapping("/api/learning/jpa")
 public class JpaLearningController {
@@ -234,4 +248,99 @@ public class JpaLearningController {
 
         return ResponseEntity.ok(ApiResponse.success("This line should not be reached"));
     }
+
+    @GetMapping("/jpql/products")
+    public ResponseEntity<ApiResponse<JpqlBasicProbeResult>> inspectJpqlBasic(
+            @RequestParam(defaultValue = "ACTIVE") ProductStatus status
+    ) {
+        JpqlBasicProbeResult result = probeService.inspectJpqlBasic(status);
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+
+    @GetMapping("/jpql/products/filter")
+    public ResponseEntity<ApiResponse<JpqlMultiConditionProbeResult>> inspectJpqlMultiCondition(
+            @RequestParam(required = false) ProductStatus status,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String keyword
+    ) {
+        JpqlMultiConditionProbeResult result = probeService.inspectJpqlMultiCondition(status, categoryId,keyword);
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+
+    @GetMapping("/jpql/products/dynamic-filter")
+    public ResponseEntity<ApiResponse<JpqlDynamicConditionProbeResult>> inspectJpqlDynamicCondition(
+            @RequestParam(required = false) ProductStatus status,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String keyword
+    ) {
+        JpqlDynamicConditionProbeResult result = probeService.inspectJpqlDynamicCondition(
+                status,
+                categoryId,
+                keyword
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+
+    @GetMapping("/native/products")
+    public ResponseEntity<ApiResponse<NativeQueryProbeResult>> inspectNativeQuery(
+            @RequestParam(defaultValue = "") String keyword
+    ) {
+        NativeQueryProbeResult result = probeService.inspectNativeQuery(keyword);
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+
+
+    @GetMapping("/native/projection/products")
+    public ResponseEntity<ApiResponse<NativeProjectionProbeResult>> inspectNativeProjection(
+            @RequestParam(defaultValue = "") String keyword
+    ) {
+        NativeProjectionProbeResult result = probeService.inspectNativeProjection(keyword);
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+
+
+    @PostMapping("/products/{id}/modifying-query/status")
+    public ResponseEntity<ApiResponse<ModifyingQueryProbeResult>> inspectModifyingQuery(
+            @PathVariable Long id,
+            @RequestParam ProductStatus status
+    ) {
+        ModifyingQueryProbeResult result = probeService.inspectModifyingQuery(id, status);
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @PostMapping("/products/{id}/modifying-query/status-clear-auto")
+    public ResponseEntity<ApiResponse<ModifyingClearAutomaticallyProbeResult>> inspectModifyingClearAutomatically(
+            @PathVariable Long id,
+            @RequestParam ProductStatus status
+    ) {
+        ModifyingClearAutomaticallyProbeResult result = probeService.inspectModifyingClearAutomatically(id, status);
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+
+    @PostMapping("/categories/{categoryId}/modifying-query/flush-and-clear-auto")
+    public ResponseEntity<ApiResponse<ModifyingFlushAndClearProbeResult>> inspectModifyingFlushAndClearAutomatically(
+            @PathVariable Long categoryId,
+            @RequestParam ProductStatus status
+    ) {
+        ModifyingFlushAndClearProbeResult result = probeService.inspectModifyingFlushAndClearAutomatically(
+                categoryId,
+                status
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+    
 }

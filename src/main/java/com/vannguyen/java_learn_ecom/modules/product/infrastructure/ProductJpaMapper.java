@@ -9,6 +9,7 @@ public class ProductJpaMapper {
     public ProductJpaEntity toEntity(Product product) {
         return new ProductJpaEntity(
                 product.getId(),
+                product.getVersion(),
                 product.getCategoryId(),
                 product.getName(),
                 product.getDescription(),
@@ -20,6 +21,7 @@ public class ProductJpaMapper {
     public Product toDomain(ProductJpaEntity entity) {
         return new Product(
                 entity.getId(),
+                entity.getVersion(),
                 entity.getCategoryId(),
                 entity.getName(),
                 entity.getDescription(),

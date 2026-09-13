@@ -10,9 +10,22 @@ public class Product {
     private String description;
     private BigDecimal price;
     private ProductStatus status;
+    private final Long version;
 
     public Product(
             Long id,
+            Long categoryId,
+            String name,
+            String description,
+            BigDecimal price,
+            ProductStatus status
+    ) {
+        this(id, null, categoryId, name, description, price, status);
+    }
+
+    public Product(
+            Long id,
+            Long version,
             Long categoryId,
             String name,
             String description,
@@ -25,6 +38,7 @@ public class Product {
         validatePrice(price);
 
         this.id = id;
+        this.version = version;
         this.categoryId = categoryId;
         this.name = name.trim();
         this.description = description.trim();
@@ -56,6 +70,10 @@ public class Product {
         return status;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+    
     public void update(
             Long categoryId,
             String name,

@@ -20,6 +20,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.Version;
 @Entity
 @Table(name = "products")
 public class ProductJpaEntity {
@@ -27,6 +28,10 @@ public class ProductJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Version
+    @Column(nullable = false)
+    private Long version;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", insertable = false, updatable = false)
@@ -68,7 +73,20 @@ public class ProductJpaEntity {
             BigDecimal price,
             ProductStatus status
     ) {
+        this(id, null, categoryId, name, description, price, status);
+    }
+
+    public ProductJpaEntity(
+            Long id,
+            Long version,
+            Long categoryId,
+            String name,
+            String description,
+            BigDecimal price,
+            ProductStatus status
+    ) {
         this.id = id;
+        this.version = version;
         this.categoryId = categoryId;
         this.name = name;
         this.description = description;
@@ -122,5 +140,13 @@ public class ProductJpaEntity {
 
     public void changeNameForLearning(String name) {
         this.name = name;
+    }
+
+    public void changePriceForLearning(BigDecimal price) {
+        this.price = price;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 import com.vannguyen.java_learn_ecom.modules.product.infrastructure.SpringDataProductJpaRepository.ProductVariantCountProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-
+import com.vannguyen.java_learn_ecom.modules.product.infrastructure.SpringDataProductJpaRepository.ProductCategoryNativeProjection;
 
 @Service
 public class JpaPersistenceContextProbeService {
@@ -814,5 +814,329 @@ public class JpaPersistenceContextProbeService {
     }
 
 
+
+
+
+
+    @Transactional(readOnly = true)
+    public JpqlBasicProbeResult inspectJpqlBasic(ProductStatus status) {
+        List<ProductJpaEntity> products = productRepository.findByStatusUsingJpql(status);
+
+        List<ProductSimpleView> items = products.stream()
+                .map(product -> new ProductSimpleView(
+                        product.getId(),
+                        product.getName(),
+                        product.getStatus().name()
+                ))
+                .toList();
+
+        return new JpqlBasicProbeResult(
+                status.name(),
+                items.size(),
+                items
+        );
+    }
+
+    public record JpqlBasicProbeResult(
+            String status,
+            int productCount,
+            List<ProductSimpleView> items
+    ) {
+    }
+
+    public record ProductSimpleView(
+            Long productId,
+            String productName,
+            String status
+    ) {
+    }
+
+
+
+
+    @Transactional(readOnly = true)
+    public JpqlMultiConditionProbeResult inspectJpqlMultiCondition(ProductStatus status, Long categoryId, String keyword) {
+        List<ProductJpaEntity> products = productRepository.findByStatusCategoryAndKeywordUsingJpql(status, categoryId, keyword);
+
+        List<ProductSimpleView> items = products.stream()
+                .map(product -> new ProductSimpleView(
+                        product.getId(),
+                        product.getName(),
+                        product.getStatus().name()
+                ))
+                .toList();
+
+        return new JpqlMultiConditionProbeResult(
+                status.name(),
+                categoryId,
+                keyword,
+                items.size(),
+                items
+        );
+    }
+
+    public record JpqlMultiConditionProbeResult(
+            String status,
+            Long categoryId,
+            String keyword,
+            int productCount,
+            List<ProductSimpleView> items
+    ) {
+    }
+
+
+
+
+    @Transactional(readOnly = true)
+    public JpqlDynamicConditionProbeResult inspectJpqlDynamicCondition(
+            ProductStatus status,
+            Long categoryId,
+            String keyword
+    ) {
+        String normalizedKeyword = normalizeKeywordToEmpty(keyword);
+        boolean hasKeyword = !normalizedKeyword.isBlank();
+
+        List<ProductJpaEntity> products = productRepository.searchUsingDynamicJpql(
+                status,
+                categoryId,
+                hasKeyword,
+                normalizedKeyword
+        );
+
+        List<ProductSimpleView> items = products.stream()
+                .map(product -> new ProductSimpleView(
+                        product.getId(),
+                        product.getName(),
+                        product.getStatus().name()
+                ))
+                .toList();
+
+        return new JpqlDynamicConditionProbeResult(
+                status == null ? null : status.name(),
+                categoryId,
+                hasKeyword ? normalizedKeyword : null,
+                items.size(),
+                items
+        );
+    }
+
+    private String normalizeKeywordToEmpty(String keyword) {
+        if (keyword == null) {
+            return "";
+        }
+
+        return keyword.trim();
+    }
+
+    public record JpqlDynamicConditionProbeResult(
+            String status,
+            Long categoryId,
+            String keyword,
+            int productCount,
+            List<ProductSimpleView> items
+    ) {
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public NativeQueryProbeResult inspectNativeQuery(String keyword) {
+        String normalizedKeyword = normalizeKeywordToEmpty(keyword);
+
+        List<ProductJpaEntity> products = productRepository.searchByNameUsingNativeSql(normalizedKeyword);
+
+        List<ProductSimpleView> items = products.stream()
+                .map(product -> new ProductSimpleView(
+                        product.getId(),
+                        product.getName(),
+                        product.getStatus().name()
+                ))
+                .toList();
+
+        return new NativeQueryProbeResult(
+                normalizedKeyword,
+                items.size(),
+                items
+        );
+    }
+
+    public record NativeQueryProbeResult(
+            String keyword,
+            int productCount,
+            List<ProductSimpleView> items
+    ) {
+    }
+
+
+
+
+    @Transactional(readOnly = true)
+    public NativeProjectionProbeResult inspectNativeProjection(String keyword) {
+        String normalizedKeyword = normalizeKeywordToEmpty(keyword);
+
+        List<ProductCategoryNativeProjection> rows = productRepository.searchProductCategoriesUsingNativeProjection(
+                normalizedKeyword
+        );
+
+        List<ProductCategoryNativeView> items = rows.stream()
+                .map(row -> new ProductCategoryNativeView(
+                        row.getProductId(),
+                        row.getProductName(),
+                        row.getCategoryName()
+                ))
+                .toList();
+
+        return new NativeProjectionProbeResult(
+                normalizedKeyword,
+                items.size(),
+                items
+        );
+    }
+
+    public record NativeProjectionProbeResult(
+            String keyword,
+            int productCount,
+            List<ProductCategoryNativeView> items
+    ) {
+    }
+
+    public record ProductCategoryNativeView(
+            Long productId,
+            String productName,
+            String categoryName
+    ) {
+    }
+
+
+    @Transactional
+    public ModifyingQueryProbeResult inspectModifyingQuery(Long productId, ProductStatus status) {
+        int updatedRows = productRepository.updateStatusByIdUsingModifyingQuery(productId, status);
+
+        entityManager.clear();
+
+        ProductJpaEntity reloadedProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        return new ModifyingQueryProbeResult(
+                productId,
+                updatedRows,
+                reloadedProduct.getStatus().name()
+        );
+    }
+
+    public record ModifyingQueryProbeResult(
+            Long productId,
+            int updatedRows,
+            String statusAfterReload
+    ) {
+    }
+
+
+    @Transactional
+    public ModifyingClearAutomaticallyProbeResult inspectModifyingClearAutomatically(
+            Long productId,
+            ProductStatus status
+    ) {
+        ProductJpaEntity productBeforeUpdate = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        boolean managedBeforeUpdate = entityManager.contains(productBeforeUpdate);
+        String statusBeforeUpdate = productBeforeUpdate.getStatus().name();
+
+        int updatedRows = productRepository.updateStatusByIdAndClearAutomatically(productId, status);
+
+        boolean managedAfterUpdate = entityManager.contains(productBeforeUpdate);
+
+        ProductJpaEntity productAfterReload = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        return new ModifyingClearAutomaticallyProbeResult(
+                productId,
+                statusBeforeUpdate,
+                managedBeforeUpdate,
+                updatedRows,
+                managedAfterUpdate,
+                productAfterReload.getStatus().name()
+        );
+    }
+
+    public record ModifyingClearAutomaticallyProbeResult(
+            Long productId,
+            String statusBeforeUpdate,
+            boolean managedBeforeUpdate,
+            int updatedRows,
+            boolean managedAfterUpdate,
+            String statusAfterReload
+    ) {
+    }
+
+
+
+    @Transactional
+    public ModifyingFlushAndClearProbeResult inspectModifyingFlushAndClearAutomatically(
+            Long categoryId,
+            ProductStatus status
+    ) {
+        ProductJpaEntity productA = new ProductJpaEntity(
+                null,
+                categoryId,
+                "Flush Before Clear Demo A",
+                "This product checks pending dirty changes",
+                BigDecimal.valueOf(50.00),
+                ProductStatus.DRAFT
+        );
+
+        ProductJpaEntity productB = new ProductJpaEntity(
+                null,
+                categoryId,
+                "Flush Before Clear Demo B",
+                "This product will be updated by modifying query",
+                BigDecimal.valueOf(55.00),
+                ProductStatus.DRAFT
+        );
+
+        productRepository.save(productA);
+        productRepository.save(productB);
+
+        productA.changeNameForLearning("Flush Before Clear Demo A Updated");
+
+        int updatedRows = productRepository.updateStatusByIdFlushAndClearAutomatically(
+                productB.getId(),
+                status
+        );
+
+        boolean productAStillManagedAfterClear = entityManager.contains(productA);
+        boolean productBStillManagedAfterClear = entityManager.contains(productB);
+
+        ProductJpaEntity reloadedProductA = productRepository.findById(productA.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productA.getId()));
+
+        ProductJpaEntity reloadedProductB = productRepository.findById(productB.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productB.getId()));
+
+        String productANameAfterReload = reloadedProductA.getName();
+        String productBStatusAfterReload = reloadedProductB.getStatus().name();
+
+        productRepository.delete(reloadedProductA);
+        productRepository.delete(reloadedProductB);
+        entityManager.flush();
+
+        return new ModifyingFlushAndClearProbeResult(
+                updatedRows,
+                productAStillManagedAfterClear,
+                productBStillManagedAfterClear,
+                productANameAfterReload,
+                productBStatusAfterReload
+        );
+    }
+
+    public record ModifyingFlushAndClearProbeResult(
+            int updatedRows,
+            boolean productAStillManagedAfterClear,
+            boolean productBStillManagedAfterClear,
+            String productANameAfterReload,
+            String productBStatusAfterReload
+    ) {
+    }
 
 }
