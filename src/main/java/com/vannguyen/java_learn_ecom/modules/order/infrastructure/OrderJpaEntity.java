@@ -65,6 +65,15 @@ public class OrderJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Column(name = "cancel_reason", length = 500)
+    private String cancelReason;
+
+    @Column(nullable = false, length = 30)
+    private String source;
+
     protected OrderJpaEntity() {
     }
 
@@ -152,5 +161,17 @@ public class OrderJpaEntity {
 
     public List<OrderItemJpaEntity> getItems() {
         return items;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public String getSource() {
+        return source;
     }
 }
