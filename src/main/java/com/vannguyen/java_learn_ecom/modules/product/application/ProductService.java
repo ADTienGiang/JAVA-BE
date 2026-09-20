@@ -20,13 +20,16 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductCache productCache;
 
     public ProductService(
             ProductRepository productRepository,
-            CategoryRepository categoryRepository
+            CategoryRepository categoryRepository,
+            ProductCache productCache
     ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.productCache = productCache;
     }
 
     @Transactional
@@ -68,12 +71,22 @@ public class ProductService {
     public Product findById(Long id) {
         log.info("Find product by id: id={}", id);
 
+        return productCache.getById(id)
+                .orElseGet(() -> {
+                    Product product = findExistingProductFromDatabase(id);
+                    productCache.put(product);
+                    return product;
+                });
+    }
+
+    private Product findExistingProductFromDatabase(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found: id={}", id);
                     return new ResourceNotFoundException("Product not found");
                 });
     }
+
     @Transactional(readOnly = true)
     public List<Product> findAllActive() {
         log.info("Find all active products");
@@ -85,7 +98,7 @@ public class ProductService {
         log.info("Update product request received: id={}, categoryId={}, name={}",
                 command.id(), command.categoryId(), command.name());
 
-        Product product = findById(command.id());
+        Product product = findExistingProductFromDatabase(command.id());
 
         Category category = categoryRepository.findById(command.categoryId())
                 .orElseThrow(() -> {
@@ -109,6 +122,8 @@ public class ProductService {
 
         Product savedProduct = productRepository.save(product);
 
+        productCache.evictById(savedProduct.getId());
+
         log.info("Product updated successfully: id={}, categoryId={}, name={}",
                 savedProduct.getId(), savedProduct.getCategoryId(), savedProduct.getName());
 
@@ -118,11 +133,13 @@ public class ProductService {
     public Product deactivate(Long id) {
         log.info("Deactivate product request received: id={}", id);
 
-        Product product = findById(id);
+        Product product = findExistingProductFromDatabase(id);
 
         product.deactivate();
 
         Product savedProduct = productRepository.save(product);
+
+        productCache.evictById(savedProduct.getId());
 
         log.info("Product deactivated successfully: id={}", savedProduct.getId());
 
