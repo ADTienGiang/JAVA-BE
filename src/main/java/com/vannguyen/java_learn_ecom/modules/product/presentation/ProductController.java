@@ -16,6 +16,7 @@ import com.vannguyen.java_learn_ecom.modules.product.application.UpdateProductCo
 import com.vannguyen.java_learn_ecom.modules.product.application.ProductSearchQuery;
 import java.util.List;
 import com.vannguyen.java_learn_ecom.common.dto.PageResult;
+import org.springframework.security.access.prepost.PreAuthorize;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -31,6 +32,7 @@ public class ProductController {
         this.productMapper = productMapper;
     }
 
+    @PreAuthorize("hasAuthority('PRODUCT_CREATE')")
     @PostMapping
     public ResponseEntity<ApiResponse<ProductResponse>> create(
             @Valid @RequestBody CreateProductRequest request
@@ -92,7 +94,7 @@ public class ProductController {
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
-
+    @PreAuthorize("hasAuthority('PRODUCT_UPDATE')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponse>> update(
             @PathVariable Long id,
@@ -104,7 +106,7 @@ public class ProductController {
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
-
+    @PreAuthorize("hasAuthority('PRODUCT_DELETE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponse>> deactivate(
             @PathVariable Long id

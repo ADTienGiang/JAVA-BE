@@ -87,7 +87,8 @@ public class OrderJpaEntity {
             String addressLine,
             String ward,
             String district,
-            String city
+            String city,
+            String source
     ) {
         this.id = id;
         this.customerId = customerId;
@@ -99,6 +100,7 @@ public class OrderJpaEntity {
         this.ward = ward;
         this.district = district;
         this.city = city;
+        this.source = source;
     }
 
     public void addItem(OrderItemJpaEntity item) {

@@ -21,7 +21,8 @@ public class OrderJpaMapper {
                 address.addressLine(),
                 address.ward(),
                 address.district(),
-                address.city()
+                address.city(),
+                order.getSource()
         );
 
         order.getItems()

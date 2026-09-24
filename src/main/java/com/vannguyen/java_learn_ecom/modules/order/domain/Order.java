@@ -77,6 +77,10 @@ public class Order {
         return status;
     }
 
+    public String getSource(){
+        return "WEB";
+    }
+
     private void validateCustomerId(Long customerId) {
         if (customerId == null) {
             throw new IllegalArgumentException("Order customer id must not be null");
