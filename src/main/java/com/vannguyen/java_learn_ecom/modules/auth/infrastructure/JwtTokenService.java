@@ -16,13 +16,16 @@ public class JwtTokenService {
 
     private final SecretKey signingKey;
     private final long accessTokenExpirationMinutes;
+    private final long refreshTokenExpirationDays;
 
     public JwtTokenService(
             @Value("${app.jwt.secret}") String secret,
-            @Value("${app.jwt.access-token-expiration-minutes}") long accessTokenExpirationMinutes
+            @Value("${app.jwt.access-token-expiration-minutes}") long accessTokenExpirationMinutes,
+            @Value("${app.jwt.refresh-token-expiration-days}") long refreshTokenExpirationDays
     ) {
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpirationMinutes = accessTokenExpirationMinutes;
+        this.refreshTokenExpirationDays = refreshTokenExpirationDays;
     }
 
     public String generateAccessToken(UserAccount userAccount) {
@@ -31,6 +34,7 @@ public class JwtTokenService {
 
         return Jwts.builder()
                 .subject(String.valueOf(userAccount.getId()))
+                .claim("type", "access")
                 .claim("email", userAccount.getEmail())
                 .claim("role", userAccount.getRole().name())
                 .issuedAt(Date.from(now))
@@ -45,5 +49,18 @@ public class JwtTokenService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public String generateRefreshToken(UserAccount userAccount) {
+        Instant now = Instant.now();
+        Instant expiresAt = now.plusSeconds(refreshTokenExpirationDays * 24 * 60 * 60);
+
+        return Jwts.builder()
+                .subject(String.valueOf(userAccount.getId()))
+                .claim("type", "refresh")
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiresAt))
+                .signWith(signingKey)
+                .compact();
     }
 }

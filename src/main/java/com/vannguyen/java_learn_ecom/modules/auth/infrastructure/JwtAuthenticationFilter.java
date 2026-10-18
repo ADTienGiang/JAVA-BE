@@ -48,6 +48,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             Claims claims = jwtTokenService.parseClaims(token);
+
+            if (!"access".equals(claims.get("type", String.class))) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             Long userId = Long.valueOf(claims.getSubject());
 
             UserAccount userAccount = userAccountRepository.findById(userId)

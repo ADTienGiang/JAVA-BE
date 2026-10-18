@@ -17,5 +17,19 @@ services:
     ports:
       - "56379:6379"
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: java-learn-ecom-rabbitmq
+    hostname: java-learn-ecom-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ecom
+      RABBITMQ_DEFAULT_PASS: ecom_local_password
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - java_learn_ecom_rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
   java_learn_ecom_postgres_data:
+  java_learn_ecom_rabbitmq_data:

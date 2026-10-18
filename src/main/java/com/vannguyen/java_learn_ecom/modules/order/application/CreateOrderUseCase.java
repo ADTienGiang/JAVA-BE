@@ -9,6 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import com.vannguyen.java_learn_ecom.modules.order.application.event.OrderCreatedEvent;
+import org.springframework.context.ApplicationEventPublisher;
+
+import java.time.Instant;
+import java.util.UUID;
+
 
 @Service
 public class CreateOrderUseCase {
@@ -16,15 +22,18 @@ public class CreateOrderUseCase {
     private final ProductCatalogGateway productCatalogGateway;
     private final StockGateway stockGateway;
     private final OrderRepository orderRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public CreateOrderUseCase(
             ProductCatalogGateway productCatalogGateway,
             StockGateway stockGateway,
-            OrderRepository orderRepository
+            OrderRepository orderRepository,
+            ApplicationEventPublisher applicationEventPublisher
     ) {
         this.productCatalogGateway = productCatalogGateway;
         this.stockGateway = stockGateway;
         this.orderRepository = orderRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Transactional
@@ -44,7 +53,18 @@ public class CreateOrderUseCase {
                 shippingAddress
         );
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                UUID.randomUUID(),
+                savedOrder.getId(),
+                savedOrder.getCustomerId(),
+                Instant.now()
+        );
+
+        applicationEventPublisher.publishEvent(event);
+
+        return savedOrder;
     }
 
     private OrderItem createOrderItem(CreateOrderItemCommand itemCommand) {

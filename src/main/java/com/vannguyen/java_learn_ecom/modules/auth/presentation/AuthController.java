@@ -13,6 +13,9 @@ import com.vannguyen.java_learn_ecom.modules.auth.application.LoginUseCase;
 import com.vannguyen.java_learn_ecom.modules.auth.infrastructure.JwtTokenService;
 import com.vannguyen.java_learn_ecom.modules.auth.application.AuthenticatedUser;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import java.util.List;
+import org.springframework.security.core.Authentication;
+import com.vannguyen.java_learn_ecom.modules.auth.application.RefreshTokenUseCase;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,14 +24,17 @@ public class AuthController {
     private final RegisterUseCase registerUseCase;
     private final LoginUseCase loginUseCase;
     private final JwtTokenService jwtTokenService;
+    private final RefreshTokenUseCase refreshTokenUseCase;
 
     public AuthController(
             RegisterUseCase registerUseCase,
             LoginUseCase loginUseCase,
+            RefreshTokenUseCase refreshTokenUseCase,
             JwtTokenService jwtTokenService
     ) {
         this.registerUseCase = registerUseCase;
         this.loginUseCase = loginUseCase;
+        this.refreshTokenUseCase = refreshTokenUseCase;
         this.jwtTokenService = jwtTokenService;
     }
 
@@ -43,7 +49,8 @@ public class AuthController {
         AuthUserResponse response = new AuthUserResponse(
                 userAccount.getId(),
                 userAccount.getEmail(),
-                userAccount.getRole()
+                userAccount.getRole(),
+                List.of()
         );
 
         return ResponseEntity
@@ -62,11 +69,12 @@ public class AuthController {
         AuthUserResponse userResponse = new AuthUserResponse(
                 userAccount.getId(),
                 userAccount.getEmail(),
-                userAccount.getRole()
+                userAccount.getRole(),
+                List.of()
         );
-
         LoginResponse response = new LoginResponse(
                 jwtTokenService.generateAccessToken(userAccount),
+                jwtTokenService.generateRefreshToken(userAccount),
                 "Bearer",
                 userResponse
         );
@@ -77,12 +85,33 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<AuthUserResponse>> me(
-            @AuthenticationPrincipal AuthenticatedUser authenticatedUser
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            Authentication authentication
     ) {
+        List<String> authorities = authentication.getAuthorities()
+                .stream()
+                .map(authority -> authority.getAuthority())
+                .toList();
+
         AuthUserResponse response = new AuthUserResponse(
                 authenticatedUser.id(),
                 authenticatedUser.email(),
-                authenticatedUser.role()
+                authenticatedUser.role(),
+                authorities
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<RefreshTokenResponse>> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request
+    ) {
+        String accessToken = refreshTokenUseCase.refreshAccessToken(request.refreshToken());
+
+        RefreshTokenResponse response = new RefreshTokenResponse(
+                accessToken,
+                "Bearer"
         );
 
         return ResponseEntity.ok(ApiResponse.success(response));
