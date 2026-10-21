@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import com.vannguyen.java_learn_ecom.modules.order.application.event.OrderCreatedEvent;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -22,18 +21,18 @@ public class CreateOrderUseCase {
     private final ProductCatalogGateway productCatalogGateway;
     private final StockGateway stockGateway;
     private final OrderRepository orderRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final OrderEventOutbox orderEventOutbox;
 
     public CreateOrderUseCase(
             ProductCatalogGateway productCatalogGateway,
             StockGateway stockGateway,
             OrderRepository orderRepository,
-            ApplicationEventPublisher applicationEventPublisher
+            OrderEventOutbox orderEventOutbox
     ) {
         this.productCatalogGateway = productCatalogGateway;
         this.stockGateway = stockGateway;
         this.orderRepository = orderRepository;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.orderEventOutbox = orderEventOutbox;
     }
 
     @Transactional
@@ -62,7 +61,8 @@ public class CreateOrderUseCase {
                 Instant.now()
         );
 
-        applicationEventPublisher.publishEvent(event);
+        orderEventOutbox.save(event);
+
 
         return savedOrder;
     }

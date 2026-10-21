@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: user_java_learn_ecom
       POSTGRES_PASSWORD: v@nnguyen123
     ports:
-      - "55432:5432"
+      - "55532:5532"
     volumes:
       - java_learn_ecom_postgres_data:/var/lib/postgresql/data
 
